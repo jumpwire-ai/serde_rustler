@@ -15,14 +15,29 @@ where
     value.serialize(Serializer::from(env))
 }
 
+#[inline]
+/// Converts a native Rust type into a native Elixir term. See [conversion table](https://github.com/sunny-g/serde_rustler/tree/master/serde_rustler#conversion-table) for details about serialization behavior.
+///
+pub fn prefixed_to_term<'a, T>(env: Env<'a>, value: T, prefix: &'a str) -> Result<Term<'a>, Error>
+where
+    T: Serialize,
+{
+    let serializer = Serializer {
+        env,
+        prefix: Some(prefix),
+    };
+    value.serialize(serializer)
+}
+
 #[derive(Clone, Copy)]
 pub struct Serializer<'a> {
     env: Env<'a>,
+    prefix: Option<&'a str>,
 }
 
 impl<'a> From<Env<'a>> for Serializer<'a> {
     fn from(env: Env<'a>) -> Serializer<'a> {
-        Serializer { env }
+        Serializer { env, prefix: None }
     }
 }
 
@@ -253,7 +268,16 @@ impl<'a> ser::Serializer for Serializer<'a> {
         name: &'static str,
         len: usize,
     ) -> Result<Self::SerializeStruct, Self::Error> {
-        let name_term = util::str_to_term(&self.env, name).or(Err(Error::InvalidStructName))?;
+        let wrapped_name_term = match self.prefix {
+            Some(prefix) => {
+                let mut full_name = prefix.to_string();
+                full_name.push_str(name);
+                util::str_to_term(&self.env, full_name.as_str())
+            }
+            _ => util::str_to_term(&self.env, name),
+        };
+
+        let name_term = wrapped_name_term.or(Err(Error::InvalidStructName))?;
         Ok(MapSerializer::new(self, Some(len), Some(name_term)))
     }
 

@@ -16,4 +16,4 @@ mod util;
 
 pub use de::{from_term, Deserializer};
 pub use error::Error;
-pub use ser::{to_term, Serializer};
+pub use ser::{prefixed_to_term, to_term, Serializer};
