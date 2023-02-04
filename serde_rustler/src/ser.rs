@@ -170,16 +170,13 @@ impl<'a> ser::Serializer for Serializer<'a> {
     /// `:Millimeters` has already been created.
     fn serialize_newtype_struct<T>(
         self,
-        name: &'static str,
+        _name: &'static str,
         value: &T,
     ) -> Result<Self::Ok, Self::Error>
     where
         T: ?Sized + ser::Serialize,
     {
-        let name_term = atoms::str_to_term(&self.env, name).or(Err(Error::InvalidVariantName))?;
-        let mut ser = SequenceSerializer::new(self, Some(2), Some(name_term));
-        ser.add(value.serialize(self)?);
-        ser.to_tuple()
+        value.serialize(self)
     }
 
     #[inline]
