@@ -1,4 +1,5 @@
 use crate::{atoms, error::Error, util};
+use heck::AsSnakeCase;
 use rustler::{types::tuple, Encoder, Env, OwnedBinary, Term};
 use serde::{
     ser::{self, Serialize},
@@ -236,7 +237,9 @@ impl<'a> ser::Serializer for Serializer<'a> {
         name: &'static str,
         len: usize,
     ) -> Result<Self::SerializeTupleStruct, Self::Error> {
-        let name_term = atoms::str_to_term(&self.env, name).or(Err(Error::InvalidVariantName))?;
+        let snakecase = format!("{}", AsSnakeCase(name));
+        let name_term =
+            atoms::str_to_term(&self.env, snakecase.as_str()).or(Err(Error::InvalidVariantName))?;
         Ok(SequenceSerializer::new(self, Some(len), Some(name_term)))
     }
 
