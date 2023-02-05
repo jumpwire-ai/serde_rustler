@@ -169,7 +169,7 @@ impl<'a> ser::Serializer for Serializer<'a> {
     }
 
     #[inline]
-    /// Serializes `E::A` in `enum E { A, B }` as `:A` or `"A"`, depending on
+    /// Serializes `E::A` in `enum E { A, B }` as `:a` or `"a"`, depending on
     /// if the atom `:A` has already been created.
     fn serialize_unit_variant(
         self,
@@ -177,7 +177,8 @@ impl<'a> ser::Serializer for Serializer<'a> {
         _variant_index: u32,
         variant: &'static str,
     ) -> Result<Self::Ok, Self::Error> {
-        atoms::str_to_term(&self.env, variant).or(Err(Error::InvalidVariantName))
+        let snakecase = format!("{}", AsSnakeCase(variant));
+        atoms::str_to_term(&self.env, snakecase.as_str()).or(Err(Error::InvalidVariantName))
     }
 
     #[inline]
@@ -231,7 +232,7 @@ impl<'a> ser::Serializer for Serializer<'a> {
 
     #[inline]
     /// Serializes `struct Rgb(u8, u8, u8)` as an Elixir Record or Record-like
-    /// tuple: `{:Rgb, u8, u8, u8}` or `{"Rgb", u8, u8, u8}`.
+    /// tuple: `{:rgb, u8, u8, u8}` or `{"rgb", u8, u8, u8}`.
     fn serialize_tuple_struct(
         self,
         name: &'static str,
@@ -244,7 +245,7 @@ impl<'a> ser::Serializer for Serializer<'a> {
     }
 
     #[inline]
-    /// Serializes `E::T` of `enum E { T(u8, u8) }` as an Elixir Record or Record-like tuple: `{:T, u8, u8}` or `{"T", u8, u8}`.
+    /// Serializes `E::T` of `enum E { T(u8, u8) }` as an Elixir Record or Record-like tuple: `{:t, u8, u8}` or `{"t", u8, u8}`.
     fn serialize_tuple_variant(
         self,
         _name: &'static str,
