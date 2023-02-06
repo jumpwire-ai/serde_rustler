@@ -122,6 +122,12 @@ impl From<Error> for NifError {
     }
 }
 
+impl From<Error> for String {
+    fn from(err: Error) -> String {
+        err.to_string()
+    }
+}
+
 impl ser::Error for Error {
     fn custom<T: Display>(msg: T) -> Error {
         Error::SerializationError(msg.to_string())
