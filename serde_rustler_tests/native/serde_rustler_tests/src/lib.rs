@@ -12,7 +12,6 @@ mod types;
 use crate::types::Animal;
 use rustler::{types::tuple, Encoder, Env, NifResult, SchedulerFlags, Term};
 use serde_rustler::{atoms, from_term, to_term, Deserializer, Error, Serializer};
-use std::error::Error as StdError;
 
 rustler_export_nifs! {
     "Elixir.SerdeRustlerTests",
@@ -59,7 +58,7 @@ where
     match func() {
         Ok(term) => Ok(ok_tuple(env, term)),
         Err(reason) => {
-            let reason_term = reason.description().encode(env);
+            let reason_term = reason.to_string().encode(env);
             Ok(error_tuple(env, reason_term))
         }
     }
